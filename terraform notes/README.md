@@ -1,42 +1,141 @@
-Install terraform in your own machines
-
-Test with terraform --version Output should be similar to:
-
-terraform --version
-Terraform v1.6.4
-on windows_amd64
-Make sure you can run terraform command from anywhere in a Git Bash window
-
-Move the terraform.exe to a logical place e.g. 
-- C:\Hashicorp\Terraform
-- Add the location to the PATH env var
-- ☝️ Recommended: To make things easier in the future, you may wish to setup a shared folder for all your command line tools in a logical location. For example:
-  - Create the folder C:\my-cmd-line-tools
-  - Add C:\my-cmd-line-tools to the PATH env var
-  - Add terraform.exe (and any future command line tools) to this folder
-
-- Add the Terraform extension/plugin (official one by Hashicorp) to VSCode
-
-- Create a new folder/repo for Terraform documentation
-
-- Create a new repo for storing terraform code, name is similar to tech264-terraform
-
-- Share your terraform version output in the chat as soon as you have your terraform command working from anywhere
-
-Document everything done above
-
-Research Terraform:
-
-What is Terraform? What is it used for?
-Why use Terraform? The benefits?
-Alternatives to Terraform
-Who is using Terraform in the industry?
-In IaC, what is orchestration? How does Terraform act as "orchestrator"?
-Best practice supplying AWS credentials to Terraform
-If Terraform needs AWS access, there are different options on supplying the AWS credentials to Terraform. What is order in which Terraform looks up AWS credentials (which ways take precedence/priority)?
-What is best practice to supply AWS credentials? Include: How should AWS credentials never be passed to Terraform?
-Why use Terraform for different environments (e.g. production, testing, etc)
-Share your terraform version output in the chat as soon as you have your terraform command working from anywhere
+# Table of contents
+- [Table of contents](#table-of-contents)
+- [Download and add terraform into PATH env. var.](#download-and-add-terraform-into-path-env-var)
+- [Set-up Env. Var. for AWS](#set-up-env-var-for-aws)
+- [Research Terraform](#research-terraform)
+  - [What is Terraform? What is it used for?](#what-is-terraform-what-is-it-used-for)
+  - [Why use Terraform? The benefits?](#why-use-terraform-the-benefits)
+  - [Alternatives to Terraform](#alternatives-to-terraform)
+  - [Who is using Terraform in the industry?](#who-is-using-terraform-in-the-industry)
+  - [In IaC, what is orchestration? How does Terraform act as "orchestrator"?](#in-iac-what-is-orchestration-how-does-terraform-act-as-orchestrator)
+  - [Best practice supplying AWS credentials to Terraform](#best-practice-supplying-aws-credentials-to-terraform)
+    - [If Terraform needs AWS access, there are different options on supplying the AWS credentials to Terraform. What is order in which Terraform looks up AWS credentials (which ways take precedence/priority)?](#if-terraform-needs-aws-access-there-are-different-options-on-supplying-the-aws-credentials-to-terraform-what-is-order-in-which-terraform-looks-up-aws-credentials-which-ways-take-precedencepriority)
+    - [What is best practice to supply AWS credentials?](#what-is-best-practice-to-supply-aws-credentials)
+    - [How should AWS credentials never be passed to Terraform?](#how-should-aws-credentials-never-be-passed-to-terraform)
+- [Why use Terraform for different environments (e.g. production, testing, etc)](#why-use-terraform-for-different-environments-eg-production-testing-etc)
 
 
-![alt text](image.png)
+# Download and add terraform into PATH env. var.
+1. download the latest version of terraform
+2. place that unzipped file into a logical place in your C drive eg. "C:\my-cmd-line-tools\terraform"
+3. search edit system environment variables on your computer search bar
+4. select env. var. in the advanced tab
+![alt text](image-2.png)
+5. in user environment variables, scroll to path and edit 
+![alt text](image-3.png)
+6. add the path to your env. var. and press ok
+
+
+# Set-up Env. Var. for AWS
+
+1. Follow the instructions above but go to system 
+![alt text](image-4.png)
+2. add the two variables for your access key id and the aws secret key.
+
+
+# Research Terraform
+
+## What is Terraform? What is it used for?
+Terraform is an open-source Infrastructure as Code (IaC) tool created by HashiCorp. It allows you to define, provision, and manage infrastructure resources such as virtual machines, storage, networking, and more across multiple cloud platforms (e.g., AWS, Azure, Google Cloud) and on-premises environments using declarative configuration files.
+
+## Why use Terraform? The benefits?
+- Consistency and Repeatability: Ensures that infrastructure is deployed in the same way every time, eliminating configuration drift.
+- Version Control: Infrastructure code can be stored in repositories, allowing teams to track changes and roll back to previous versions if necessary.
+- Multi-Cloud Support: Simplifies managing infrastructure across multiple cloud providers using a consistent language.
+- Automation: Reduces the need for manual provisioning, making it easier to manage complex, scalable infrastructures efficiently.
+- Collaboration: Multiple teams can collaborate on infrastructure code, using version-controlled repositories to make changes.
+
+
+## Alternatives to Terraform
+- AWS CloudFormation
+- Pulumi
+- Ansible
+- Chef
+- SaltStack
+- Google Cloud Deployment Manager
+- Azure Resource Manager (ARM) Templates
+- Red Hat OpenShift (Helm for Kubernetes)
+- Crossplane
+- Spacelift
+
+## Who is using Terraform in the industry?
+1. **Netflix**
+2. **Airbnb**
+3. **Uber**
+4. **Adobe**
+5. **Atlassian**
+6. **GitHub**
+7. **Slack**
+8. **Lyft**
+9. **Expedia**
+10. **Stripe**
+11. **Spotify**
+12. **Salesforce**
+13. **Coca-Cola**
+14. **Samsung**
+15. **Financial Times**
+
+## In IaC, what is orchestration? How does Terraform act as "orchestrator"?
+Orchestration in Infrastructure as Code (IaC) refers to the automated arrangement, coordination, and management of complex infrastructure tasks, including provisioning, configuration, and lifecycle management of resources across multiple systems. It involves organizing the deployment of interdependent resources (e.g., databases, servers, networks) in the correct order and ensuring they interact as intended. Orchestration tools automate the entire process, from creating the infrastructure to managing interdependencies between services.
+
+How Does Terraform Act as an "Orchestrator"?
+
+Terraform acts as an orchestrator in the following ways:
+
+1. **Dependency Management**:
+   - Terraform automatically determines the order in which resources need to be created, updated, or destroyed based on their dependencies. For example, if a virtual machine depends on a network, Terraform will create the network first before provisioning the virtual machine.
+   
+2. **Infrastructure State Tracking**:
+   - Terraform maintains a **state file** that tracks the current state of infrastructure. This state helps Terraform know what resources exist, what needs to be updated, and what dependencies exist, allowing it to orchestrate infrastructure changes efficiently.
+
+3. **Automated Workflow**:
+   - Terraform automates the full workflow of creating, updating, and managing infrastructure. It applies changes only when needed, ensuring minimal disruption and high efficiency.
+   
+4. **Multi-Cloud and Multi-Service Coordination**:
+   - Terraform can orchestrate resources across multiple cloud providers (AWS, Azure, Google Cloud), private clouds, and on-premises systems. It ensures that resources from different environments can work together in a coordinated way.
+   
+5. **Declarative Syntax**:
+   - In Terraform, users declare the desired state of the infrastructure, and Terraform orchestrates the creation and management of those resources to match the desired state. It handles the complexity of ensuring resources are created, modified, or destroyed as needed.
+
+6. **Modular Infrastructure**:
+   - Terraform allows the use of reusable modules, enabling organizations to define complex infrastructure blueprints. Terraform then orchestrates the deployment and management of these modules consistently across environments.
+
+
+## Best practice supplying AWS credentials to Terraform
+
+- Prefer IAM roles for running Terraform on AWS resources.
+- Use environment variables or the AWS credentials file for local development.
+- Use secrets management tools (like AWS Secrets Manager) in production environments.
+- Never hard-code AWS credentials in your Terraform configuration.
+- Ensure IAM policies are as restrictive as possible.
+
+### If Terraform needs AWS access, there are different options on supplying the AWS credentials to Terraform. What is order in which Terraform looks up AWS credentials (which ways take precedence/priority)?
+Terraform starts with searching for the specific env. var., if no environment variables are found, Terraform looks for credentials explicitly defined in the aws provider block.
+The other ways it may look are as follows:
+1. Shared Credentials File (~/.aws/credentials)
+2. AWS CLI Config File (~/.aws/config)
+3. EC2 Instance Metadata (IAM Role)
+4. Web Identity Tokens (for Kubernetes)
+5. External Credential Management Tools (e.g., AWS Vault)
+
+### What is best practice to supply AWS credentials? 
+1. Use IAM Roles for AWS Resources (Preferred Method)
+2. Use Environment Variables (Local and CI/CD)
+3. Use AWS Credentials File
+4. Use AWS Secrets Manager or Parameter Store
+5. Use Terraform Cloud/Enterprise Secrets Management
+
+###  How should AWS credentials never be passed to Terraform?
+- Never Hard-Code AWS Credentials in Terraform Files
+- Never Commit Credentials to Version Control
+- Avoid Embedding Credentials in CI/CD Pipeline Configurations
+
+# Why use Terraform for different environments (e.g. production, testing, etc)
+- Consistency across environments.
+- Reusability of code and infrastructure components.
+- Isolation of environments for safe testing and deployment.
+- Automation of environment provisioning and updates.
+- Version control and drift detection for infrastructure changes.
+- Cost efficiency through automated resource lifecycle management.
+
+
