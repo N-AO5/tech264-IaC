@@ -1,4 +1,13 @@
 # Table of Contents
+- [Table of Contents](#table-of-contents)
+- [What is IaC?](#what-is-iac)
+- [Benefits of IaC?](#benefits-of-iac)
+- [When/where to use IaC](#whenwhere-to-use-iac)
+- [What are the tools available for IaC?](#what-are-the-tools-available-for-iac)
+- [What is configuration management (CM)?](#what-is-configuration-management-cm)
+- [What is provisioning of infrastructure? Do CM tools do it?](#what-is-provisioning-of-infrastructure-do-cm-tools-do-it)
+- [What is Ansible and how does it work?](#what-is-ansible-and-how-does-it-work)
+- [Who is using IaC and Ansible in the industry](#who-is-using-iac-and-ansible-in-the-industry)
 
 
 # What is IaC?
@@ -34,7 +43,8 @@ Immutable Infrastructure: When changes are needed, the existing infrastructure i
 - Cost-Effectiveness: Eliminates the need for manual infrastructure configuration, reducing human errors and associated costs.
 
 # When/where to use IaC
-When:
+
+When (how much time is it gonna save me? how often do i need to do this thing? what can turn into commands that i can run to make things? can i make into a script? can i use infrastructure as code to speed it up?):
 -  For automating infrastructure
 -  Maintaining consistency across environments
 -  Scaling infrastructure
@@ -49,14 +59,22 @@ Where:
 - Dynamic test environments
 
 # What are the tools available for IaC?
-- Terraform (HashiCorp) – A declarative tool that supports multiple cloud providers.
-- AWS CloudFormation – AWS’s native IaC service for managing AWS resources.
+
+**Configuration management tool:**
+(written in language that the tool understands and then it goes away and configures it how you'd like)
 - Ansible – A configuration management tool that can be used for IaC.
 - Puppet and Chef – Imperative configuration management tools.
+
+**Orchestration tool:**
+(manages the sequences of things that it needs to do, what is dependent of what? what goes first come next?)
+- Terraform (HashiCorp) – A declarative tool that supports multiple cloud providers.
+- AWS CloudFormation – AWS’s native IaC service for managing AWS resources.
 - Azure Resource Manager (ARM) Templates – Azure’s declarative IaC service.
 
 # What is configuration management (CM)?
 Configuration Management is the process of systematically handling changes in a system to ensure that it maintains its integrity over time. it manages the configuration of infrastructure, applications, and systems to ensure consistency, reliability, and security.
+- installing packages
+- configuring software that is already running
 
 **Key Components of Configuration Management:**
 - Identification: Define and document the configurations of various components, such as servers, network devices, software, and applications.
@@ -67,6 +85,7 @@ Configuration Management is the process of systematically handling changes in a 
 
 - Auditing: Verify that the actual state of systems matches the desired configuration.
 
+
 # What is provisioning of infrastructure? Do CM tools do it?
 
 The process of setting up and configuring the resources and components needed to run applications, services, or systems.
@@ -76,9 +95,7 @@ The process of setting up and configuring the resources and components needed to
  Provisioning can occur both on-premise (physical hardware) and in the cloud (virtualized resources like AWS, Azure, or Google Cloud).
 
 Some Configuration Management (CM) tools can handle basic infrastructure provisioning.
-- Ansible: Can perform some basic infrastructure provisioning tasks, such as launching cloud instances on AWS, Azure, or Google Cloud. However, it is more commonly used to configure systems once they are provisioned.
 
-- Puppet/Chef: These CM tools can configure the infrastructure after it's provisioned but are not typically used for initial provisioning.
 
 # What is Ansible and how does it work?
 
