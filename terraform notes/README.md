@@ -20,6 +20,7 @@
 2. place that unzipped file into a logical place in your C drive eg. "C:\my-cmd-line-tools\terraform"
 3. search edit system environment variables on your computer search bar
 4. select env. var. in the advanced tab
+
 ![alt text](images/image-2.png)
 
 1. in user environment variables, scroll to path and edit 
