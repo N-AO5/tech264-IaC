@@ -23,16 +23,19 @@
 
 ![alt text](images/image-2.png)
 
-1. in user environment variables, scroll to path and edit 
+5. in user environment variables, scroll to path and edit
+ 
 ![alt text](images/image-3.png)
 
-1. add the path to your env. var. and press ok
+6. add the path to your env. var. and press ok
 
 
 # Set-up Env. Var. for AWS
 
-1. Follow the instructions above but go to system 
+1. Follow the instructions above but go to system
+    
 ![alt text](images/image-4.png)
+
 2. add the two variables for your access key id and the aws secret key.
 
 
