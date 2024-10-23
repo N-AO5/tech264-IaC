@@ -1,7 +1,5 @@
 # Table of contents
 - [Table of contents](#table-of-contents)
-- [Download and add terraform into PATH env. var.](#download-and-add-terraform-into-path-env-var)
-- [Set-up Env. Var. for AWS](#set-up-env-var-for-aws)
 - [Research Terraform](#research-terraform)
   - [What is Terraform? What is it used for?](#what-is-terraform-what-is-it-used-for)
   - [Why use Terraform? The benefits?](#why-use-terraform-the-benefits)
@@ -12,34 +10,19 @@
     - [If Terraform needs AWS access, there are different options on supplying the AWS credentials to Terraform. What is order in which Terraform looks up AWS credentials (which ways take precedence/priority)?](#if-terraform-needs-aws-access-there-are-different-options-on-supplying-the-aws-credentials-to-terraform-what-is-order-in-which-terraform-looks-up-aws-credentials-which-ways-take-precedencepriority)
     - [What is best practice to supply AWS credentials?](#what-is-best-practice-to-supply-aws-credentials)
     - [How should AWS credentials never be passed to Terraform?](#how-should-aws-credentials-never-be-passed-to-terraform)
-- [Why use Terraform for different environments (e.g. production, testing, etc)](#why-use-terraform-for-different-environments-eg-production-testing-etc)
-
-
-# Download and add terraform into PATH env. var.
-1. download the latest version of terraform
-2. place that unzipped file into a logical place in your C drive eg. "C:\my-cmd-line-tools\terraform"
-3. search edit system environment variables on your computer search bar
-4. select env. var. in the advanced tab
-
-![alt text](images/image-2.png)
-
-5. in user environment variables, scroll to path and edit
- 
-![alt text](images/image-3.png)
-
-6. add the path to your env. var. and press ok
-7. you should be able to check your terraform version from anywhere in your system 
-
-![alt text](images/terraformversionimage.png)
-
-
-# Set-up Env. Var. for AWS
-
-1. Follow the instructions above but go to system
-    
-![alt text](images/image-4.png)
-
-2. add the two variables for your access key id and the aws secret key.
+    - [Why use Terraform for different environments (e.g. production, testing, etc)](#why-use-terraform-for-different-environments-eg-production-testing-etc)
+- [Download and add terraform into PATH env. var.](#download-and-add-terraform-into-path-env-var)
+- [Set-up Env. Var. for AWS](#set-up-env-var-for-aws)
+- [Terraform diagram](#terraform-diagram)
+- [Terraform Code folder](#terraform-code-folder)
+  - [Create a .gitignore files](#create-a-gitignore-files)
+  - [Create a main.tf folder to get a aws instance running](#create-a-maintf-folder-to-get-a-aws-instance-running)
+    - [TO DESTROY:](#to-destroy)
+  - [Create an AWS Security Group](#create-an-aws-security-group)
+  - [Add your key pair \& security to the instance resource block](#add-your-key-pair--security-to-the-instance-resource-block)
+  - [Adding variables](#adding-variables)
+- [Use Terraform to create a repo on GitHub](#use-terraform-to-create-a-repo-on-github)
+- [Research](#research)
 
 
 # Research Terraform
@@ -158,7 +141,7 @@ The other ways it may look are as follows:
 - Never Commit Credentials to Version Control
 - Avoid Embedding Credentials in CI/CD Pipeline Configurations
 
-# Why use Terraform for different environments (e.g. production, testing, etc)
+### Why use Terraform for different environments (e.g. production, testing, etc)
 - Consistency across environments. (developers may use different environments to develop and test their code, terraform matches their environment like dependencies (packages, versions etc) only difference could be like scalability for load in production environment)
 
 - Reusability of code and infrastructure components.
@@ -172,3 +155,260 @@ The other ways it may look are as follows:
 - Cost efficiency through automated resource lifecycle management.
 
 
+# Download and add terraform into PATH env. var.
+1. download the latest version of terraform
+2. place that unzipped file into a logical place in your C drive eg. "C:\my-cmd-line-tools\terraform"
+3. search edit system environment variables on your computer search bar
+4. select env. var. in the advanced tab
+
+![alt text](images/image-2.png)
+
+5. in user environment variables, scroll to path and edit
+ 
+![alt text](images/image-3.png)
+
+6. add the path to your env. var. and press ok
+7. you should be able to check your terraform version from anywhere in your system 
+
+![alt text](images/terraformversionimage.png)
+
+
+# Set-up Env. Var. for AWS
+
+1. Follow the instructions above but go to system
+    
+![alt text](images/image-4.png)
+
+2. add the two variables for your access key id and the aws secret key.
+
+# Terraform diagram 
+![alt text](images/terraformdiagram.png)
+
+# Terraform Code folder
+
+## Create a .gitignore files
+- No sensitive files - just used to avoid bloat in remote repos ```.terraform/```
+
+- state files contains sensitive information and credentials used by terraform - Never (even when collaborating) share these files on git repos
+```terraform.tfstate```
+```terraform.tfstate.backup```
+
+- Variable files contain the variables we set for our terraform scripts- some of the values we may not want to share (* means ignore anything)
+```*.tfvars```
+```*.auto.tfvars```
+```variables.tf```
+
+
+- override files - used to override the default values of the variables in the terraform scripts
+```override.tf```
+```override.tf.json```
+
+ALSO 
+
+No sensitive info - no need to be git ignored 
+- Locks the provider version and the plug-ins associated so other users can use the same version and theyre code wont break
+```.terraform.lock.hcl```
+
+## Create a main.tf folder to get a aws instance running
+
+1. We need to give it a set of instructions - do NOT include your AWS access keys!
+
+```
+# Create an ec2 instance
+# Where to create - provider
+
+# Which services/resources to create
+
+# Which AMI (Amazon Machine Image) ID - AMI ID ami-0c1c30571d2dae5c9 (for ubuntu 22.04 lts)
+
+# What type of instance - t2.micro
+
+# Add a public IP to this instance
+
+# Add a name to the service/ resource we create
+
+# syntax often used in HCL is KEY = VALUE
+```
+
+2. add a block to select a provider and region
+```
+# Where to create - provider
+provider "aws" {     # this is a block - you can have blocks within blocks
+  # Which region on aws
+  region = "eu-west-1" # when we do a terraform init- it will know which provider 
+}
+```
+3. navigate into the repo that contains your main.tf and run a ```terraform init`` command
+![alt text](images/tfimage.png)
+
+1. go back to your vscode and add your resource block to create your aws instance (can use ```terraform fmt``` in your bash window to fix formatting)
+
+```
+# Which services/resources to create - "aws_instance" means youre telling terraform to make an instance 
+resource "aws_instance" "app_instance" { # the "app_instance" is how you'll reference the instance within our code
+  # Which AMI (Amazon Machine Image) ID (for ubuntu 22.04 lts)
+  ami = "ami-0c1c30571d2dae5c9"
+  # What type of instance - t2.micro
+  instance_type = "t2.micro"
+  # Add a public IP to this instance - boolean value true as we want to associate a public ip
+  associate_public_ip_address = true
+  # Add a name to the service/ resource we create
+  tags = {
+    Name = "tech264-anjy-tf-app-instance"
+  }
+}
+```
+
+5. save and go to bash and run the command ```terraform plan```
+6. terraform will give a colour coded list of what it will create and destroy
+![alt text](images/tfimage-1.png)
+![alt text](images/tfimage-2.png)
+
+1. ``` -out``` option can be used used to save the plan (useful for ci/cd pipelines)
+2. ``` terraform apply``` recreates the plan and then asks for confirmation - anything but yes will cancel the actions
+
+![alt text](images/tfimage-3.png)
+
+1. type "yes" and create your instance 
+
+![alt text](images/tfimage-5.png)
+
+
+1.   check AWS website and your instance has been created
+![alt text](images/tfimage-4.png)
+
+### TO DESTROY:
+
+``` terraform destroy```
+
+![alt text](images/tfimage-6.png)  
+
+then type yes to confirm then it will destroy
+
+![alt text](images/tfimage-7.png)
+
+## Create an AWS Security Group
+Using Terraform and Terraform official documentation:
+
+- In your Create an AWS security group
+  - Allow port 22 from localhost
+  - Allow port 3000 from all
+  - Allow port 80 from all
+
+1. Create a security group resource
+2. include all the ports you want to allow in
+3. and make sure it allows outbound connection too
+
+```
+resource "aws_security_group" "tech264_anjy_security_group" {
+  name        = "tech264-anjy-tf-allow-port-22-3000-80"
+  description = "Allow inbound traffic on port 22, 3000 and 80"
+
+  # Allow SSH (port 22) from localhost (replace with your public IP)
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow port 3000 for MONGDB from all IP addresses
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  # Allow HTTP (port 80) from all IP addresses
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outgoing traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # -1 means all protocols
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "tech264-anjy-tf-allow-port-22-3000-80"
+  }
+}
+```
+## Add your key pair & security to the instance resource block
+- Add your key pair and reference the key (aws.pem) that was made previously
+- add the security group you'd like your instance to be associated with 
+
+```
+key_name = "tech264-anjy-aws-key"
+ # Add a security group to this instance
+vpc_security_group_ids=[aws_security_group.tech264_anjy_security_group.id]
+```
+## Adding variables 
+1. Create a new terraform file for your variables "variables.tf"
+2. The file must be in the same folder as your main.tf in order for them to be able to reference each other
+3. format your variables like belows (description is optional)
+
+```
+variable "app_ami_id" {
+  description = "The AMI ID for the AWS app instance"
+  default     = "ami-0c1c30571d2dae5c9"
+}
+```
+1. in the main.tf file reference your variable by typing "var." followed by your variable name 
+![alt text](images/var.image.png)
+
+# Use Terraform to create a repo on GitHub
+
+1. Create a folder for your main.tf file and at a provider block to reference github as well as a resource block to create a repo
+```
+# Set the GitHub provider
+provider "github" {
+  token = var.GITHUB_TOKEN
+}
+
+# Create a new GitHub repository
+resource "github_repository" "new_repo" {
+  name        = "Tech264-anjy-tf-create-github-repo"
+  description = "Repo created using terraform"
+  visibility  = "public"  
+}
+
+```
+2. create a variable.tf to reference the github token
+``` 
+variable "GITHUB_TOKEN" {
+  description = "The GitHub token to authenticate with the GitHub API"
+  type        = string
+  sensitive   = true
+}
+
+```
+3. go to github -> settings -> developer settings -> personal access tokens
+4. create a new token and select repo as the scope
+5. go to your system properties -> env. var.
+6. add your Github_token to your system and name it like so:
+
+![alt text](images/tf_var_git_token.png)
+
+7. make sure to add the "TF_VAR" so that terraform is able to find it when it is referenced in your main.tf file
+8. create a git ignore and include state files
+9. cd into the repo on git bash
+10.  do a terraform init & apply
+11.  your repo should appear!
+
+
+# Research
+What is pull and push configuration management (IaC)?
+Which tools support push/pull?
+Does Terraform use the push or pull configuration?
+Which is better: push or pull configuration management?
+Include desired state vs current state in your documentation
+Complete documentation around 17:00 and paste link to it in the chat
