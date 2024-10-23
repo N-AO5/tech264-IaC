@@ -20,16 +20,16 @@
 2. place that unzipped file into a logical place in your C drive eg. "C:\my-cmd-line-tools\terraform"
 3. search edit system environment variables on your computer search bar
 4. select env. var. in the advanced tab
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 5. in user environment variables, scroll to path and edit 
-![alt text](image-3.png)
+![alt text](images/image-3.png)
 6. add the path to your env. var. and press ok
 
 
 # Set-up Env. Var. for AWS
 
 1. Follow the instructions above but go to system 
-![alt text](image-4.png)
+![alt text](images/image-4.png)
 2. add the two variables for your access key id and the aws secret key.
 
 
@@ -63,17 +63,15 @@ Terraform is an open-source Infrastructure as Code (IaC) tool created by HashiCo
 2. **Airbnb**
 3. **Uber**
 4. **Adobe**
-5. **Atlassian**
-6. **GitHub**
-7. **Slack**
-8. **Lyft**
-9. **Expedia**
-10. **Stripe**
-11. **Spotify**
-12. **Salesforce**
-13. **Coca-Cola**
-14. **Samsung**
-15. **Financial Times**
+5. **GitHub**
+6. **Slack**
+7. **Lyft**
+8. **Expedia**
+9.  **Spotify**
+10. **Salesforce**
+11. **Coca-Cola**
+12. **Samsung**
+13. **Financial Times**
 
 ## In IaC, what is orchestration? How does Terraform act as "orchestrator"?
 Orchestration in Infrastructure as Code (IaC) refers to the automated arrangement, coordination, and management of complex infrastructure tasks, including provisioning, configuration, and lifecycle management of resources across multiple systems. It involves organizing the deployment of interdependent resources (e.g., databases, servers, networks) in the correct order and ensuring they interact as intended. Orchestration tools automate the entire process, from creating the infrastructure to managing interdependencies between services.
