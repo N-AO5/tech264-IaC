@@ -21,9 +21,11 @@
 3. search edit system environment variables on your computer search bar
 4. select env. var. in the advanced tab
 ![alt text](images/image-2.png)
-5. in user environment variables, scroll to path and edit 
+
+1. in user environment variables, scroll to path and edit 
 ![alt text](images/image-3.png)
-6. add the path to your env. var. and press ok
+
+1. add the path to your env. var. and press ok
 
 
 # Set-up Env. Var. for AWS
