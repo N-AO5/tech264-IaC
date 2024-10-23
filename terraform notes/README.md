@@ -28,6 +28,9 @@
 ![alt text](images/image-3.png)
 
 6. add the path to your env. var. and press ok
+7. you should be able to check your terraform version from anywhere in your system 
+
+![alt text](images/terraformversionimage.png)
 
 
 # Set-up Env. Var. for AWS
@@ -42,15 +45,36 @@
 # Research Terraform
 
 ## What is Terraform? What is it used for?
-Terraform is an open-source Infrastructure as Code (IaC) tool created by HashiCorp. It allows you to define, provision, and manage infrastructure resources such as virtual machines, storage, networking, and more across multiple cloud platforms (e.g., AWS, Azure, Google Cloud) and on-premises environments using declarative configuration files.
+**Primarily for orchestration tool used to provision infrastructure**
+
+- Terraform is an open-source Infrastructure as Code (IaC) tool created by HashiCorp. 
+
+- It allows you to define, create, deploys and manage infrastructure resources such as virtual machines, storage, networking, and more across multiple cloud platforms  and on-premises environments using declarative configuration files.
+
+- Terraform sees infrastructure as immutable, meaning it can destroy and create as needed.
+
+- Uses Hashicorp configuration language (HCL) which can be seamlessly converted to JSON
+
 
 ## Why use Terraform? The benefits?
+
 - Consistency and Repeatability: Ensures that infrastructure is deployed in the same way every time, eliminating configuration drift.
+
 - Version Control: Infrastructure code can be stored in repositories, allowing teams to track changes and roll back to previous versions if necessary.
+
 - Multi-Cloud Support: Simplifies managing infrastructure across multiple cloud providers using a consistent language.
+
+- Cloud agnostic: Uses different providers, each provider maintains their own plug-ins that will allow us to interface with the API of that particular provider.
+
 - Automation: Reduces the need for manual provisioning, making it easier to manage complex, scalable infrastructures efficiently.
+
 - Collaboration: Multiple teams can collaborate on infrastructure code, using version-controlled repositories to make changes.
 
+- Declarative: You define the desired state of your infrastructure (e.g., "I want 3 instances running"), and the IaC tool figures out how to achieve that.
+
+- Open source: Can be used for free commercial by businesses but can't use their code to compete against them.
+
+- Easy to use
 
 ## Alternatives to Terraform
 - AWS CloudFormation
@@ -130,16 +154,21 @@ The other ways it may look are as follows:
 5. Use Terraform Cloud/Enterprise Secrets Management
 
 ###  How should AWS credentials never be passed to Terraform?
-- Never Hard-Code AWS Credentials in Terraform Files
+- **Never Hard-Code AWS Credentials in Terraform Files**
 - Never Commit Credentials to Version Control
 - Avoid Embedding Credentials in CI/CD Pipeline Configurations
 
 # Why use Terraform for different environments (e.g. production, testing, etc)
-- Consistency across environments.
+- Consistency across environments. (developers may use different environments to develop and test their code, terraform matches their environment like dependencies (packages, versions etc) only difference could be like scalability for load in production environment)
+
 - Reusability of code and infrastructure components.
+
 - Isolation of environments for safe testing and deployment.
+
 - Automation of environment provisioning and updates.
+
 - Version control and drift detection for infrastructure changes.
+
 - Cost efficiency through automated resource lifecycle management.
 
 
