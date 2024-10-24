@@ -23,6 +23,10 @@
   - [Adding variables](#adding-variables)
 - [Use Terraform to create a repo on GitHub](#use-terraform-to-create-a-repo-on-github)
 - [Research](#research)
+    - [What is pull and push configuration management (IaC)?](#what-is-pull-and-push-configuration-management-iac)
+    - [Which tools support push/pull?](#which-tools-support-pushpull)
+    - [Does Terraform use the push or pull configuration?](#does-terraform-use-the-push-or-pull-configuration)
+    - [Which is better: push or pull configuration management?](#which-is-better-push-or-pull-configuration-management)
 
 
 # Research Terraform
@@ -406,9 +410,29 @@ variable "GITHUB_TOKEN" {
 
 
 # Research
-What is pull and push configuration management (IaC)?
-Which tools support push/pull?
-Does Terraform use the push or pull configuration?
-Which is better: push or pull configuration management?
-Include desired state vs current state in your documentation
-Complete documentation around 17:00 and paste link to it in the chat
+### What is pull and push configuration management (IaC)?
+**Pull Config.**
+- In pull configuration, the nodes (servers) regularly request or "pull" configuration updates from a central configuration server.
+
+- Each node independently checks for updates and applies the configuration as needed.
+
+- The central server maintains the desired state (how you want your infrastructure or system to be configured) of the infrastructure, and nodes compare their current state (the actual state of your infrastructure or system at any given moment) to this desired state.
+
+**Push Config.**
+- In push configuration, the central server or an administrator actively pushes the configuration changes to the nodes.
+
+- The process is immediate, and the central system applies changes directly to the targeted infrastructure.
+
+### Which tools support push/pull?
+Pull - Puppet & Chef
+Push - Ansible & terraform
+
+### Does Terraform use the push or pull configuration?
+Terraform typically operates as a push-based tool. When running terraform apply, Terraform pushes the changes directly to cloud providers (e.g., AWS, Azure, GCP) to provision or manage resources.
+
+### Which is better: push or pull configuration management?
+***Pull configuration*** is better for large, distributed, and scalable environments where nodes need to operate independently and pull updates as needed.
+
+***Push configuration*** is better for smaller, controlled environments or situations where immediate updates are necessary.
+
+
