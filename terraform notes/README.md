@@ -10,23 +10,24 @@
     - [If Terraform needs AWS access, there are different options on supplying the AWS credentials to Terraform. What is order in which Terraform looks up AWS credentials (which ways take precedence/priority)?](#if-terraform-needs-aws-access-there-are-different-options-on-supplying-the-aws-credentials-to-terraform-what-is-order-in-which-terraform-looks-up-aws-credentials-which-ways-take-precedencepriority)
     - [What is best practice to supply AWS credentials?](#what-is-best-practice-to-supply-aws-credentials)
     - [How should AWS credentials never be passed to Terraform?](#how-should-aws-credentials-never-be-passed-to-terraform)
-    - [Why use Terraform for different environments (e.g. production, testing, etc)](#why-use-terraform-for-different-environments-eg-production-testing-etc)
-    - [What is pull and push configuration management (IaC)?](#what-is-pull-and-push-configuration-management-iac)
+  - [Why use Terraform for different environments (e.g. production, testing, etc)](#why-use-terraform-for-different-environments-eg-production-testing-etc)
+  - [What is pull and push configuration management (IaC)?](#what-is-pull-and-push-configuration-management-iac)
     - [Which tools support push/pull?](#which-tools-support-pushpull)
     - [Does Terraform use the push or pull configuration?](#does-terraform-use-the-push-or-pull-configuration)
     - [Which is better: push or pull configuration management?](#which-is-better-push-or-pull-configuration-management)
-  - [](#)
 - [Download and add terraform into PATH env. var.](#download-and-add-terraform-into-path-env-var)
 - [Set-up Env. Var. for AWS](#set-up-env-var-for-aws)
 - [Terraform diagram](#terraform-diagram)
 - [Terraform Code folder](#terraform-code-folder)
   - [Create a .gitignore files](#create-a-gitignore-files)
-  - [Create a main.tf folder to get a aws instance running](#create-a-maintf-folder-to-get-a-aws-instance-running)
+    - [IF YOU'VE ALREADY PUSHED SENSITIVE INFORMATION](#if-youve-already-pushed-sensitive-information)
+  - [Create a main.tf folder to get a AWS instance running](#create-a-maintf-folder-to-get-a-aws-instance-running)
     - [TO DESTROY:](#to-destroy)
   - [Create an AWS Security Group](#create-an-aws-security-group)
   - [Add your key pair \& security to the instance resource block](#add-your-key-pair--security-to-the-instance-resource-block)
   - [Adding variables](#adding-variables)
 - [Use Terraform to create a repo on GitHub](#use-terraform-to-create-a-repo-on-github)
+- [Use Terraform to create a 2-tier deployment on Azure](#use-terraform-to-create-a-2-tier-deployment-on-azure)
 
 
 # Research Terraform
@@ -145,8 +146,13 @@ The other ways it may look are as follows:
 - Never Commit Credentials to Version Control
 - Avoid Embedding Credentials in CI/CD Pipeline Configurations
 
-### Why use Terraform for different environments (e.g. production, testing, etc)
-- Consistency across environments. (developers may use different environments to develop and test their code, terraform matches their environment like dependencies (packages, versions etc) only difference could be like scalability for load in production environment)
+## Why use Terraform for different environments (e.g. production, testing, etc)
+
+- Consistency across environments. (developers may use different environments to develop and test their code).
+  
+- Terraform matches their environment like dependencies (packages, versions, architecture etc).
+
+- Difference could be like scalability for load in production environment vs testing environment
 
 - Reusability of code and infrastructure components.
 
@@ -159,7 +165,7 @@ The other ways it may look are as follows:
 - Cost efficiency through automated resource lifecycle management.
 
 
-### What is pull and push configuration management (IaC)?
+## What is pull and push configuration management (IaC)?
 **Pull Config.**
 - In pull configuration, the nodes (servers) regularly request or "pull" configuration updates from a central configuration server.
 
@@ -188,7 +194,7 @@ Terraform typically operates as a push-based tool. When running terraform apply,
 
 ---
 <br>
----
+
 
 # Download and add terraform into PATH env. var.
 1. download the latest version of terraform
@@ -241,10 +247,16 @@ Terraform typically operates as a push-based tool. When running terraform apply,
 ALSO 
 
 No sensitive info - no need to be git ignored 
-- Locks the provider version and the plug-ins associated so other users can use the same version and theyre code wont break
+- Locks the provider version and the plug-ins associated so other users can use the same version and their code wont break
 ```.terraform.lock.hcl```
 
-## Create a main.tf folder to get a aws instance running
+### IF YOU'VE ALREADY PUSHED SENSITIVE INFORMATION
+- Delete the public repo immediately or make the repo private
+- delete the .git folder and reinitialize the repo locally
+- Can use ```git filter-branch```
+- Can also use ```git rm --cached .gitignore``` to remove history
+
+## Create a main.tf folder to get a AWS instance running
 
 1. We need to give it a set of instructions - do NOT include your AWS access keys!
 
@@ -300,7 +312,7 @@ resource "aws_instance" "app_instance" { # the "app_instance" is how you'll refe
 ![alt text](images/tfimage-2.png)
 
 1. ``` -out``` option can be used used to save the plan (useful for ci/cd pipelines)
-2. ``` terraform apply``` recreates the plan and then asks for confirmation - anything but yes will cancel the actions
+2. ``` terraform apply``` recreates the plan and then asks for confirmation - anything but yes will cancel the actions. This command is potentially destructive, the plan cmd allows you to double check (safely) what you intend to do.
 
 ![alt text](images/tfimage-3.png)
 
@@ -439,3 +451,23 @@ variable "GITHUB_TOKEN" {
 10.  do a terraform init & apply
 11.  your repo should appear!
 
+# Use Terraform to create a 2-tier deployment on Azure
+
+
+Create your own VNet with 2 subnets
+Use the same CIDR blocks as you used when we created the 2-subnet VNet manually
+
+Create the app VM's NSG to allow ports 22, 80 and 3000
+Create the DB VM's NSG to allow:
+SSH
+Mongo DB from public-subnet CIDR block
+Deny everything else
+Create the app-instance and db-instance in the VNet created by Terraform, and to use the NSGs created by Terraform
+Helpful hints:
+
+Use the official documentation for Terraform
+Name things appropriately so that you know what you created with Terraform
+Extra credit:
+
+Work out how we can get Terraform to add key to our EC2 instance
+Work out how to get user data to run on each of the VMs
