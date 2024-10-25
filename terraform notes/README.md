@@ -185,6 +185,8 @@ Push - Ansible & terraform
 ### Does Terraform use the push or pull configuration?
 Terraform typically operates as a push-based tool. When running terraform apply, Terraform pushes the changes directly to cloud providers (e.g., AWS, Azure, GCP) to provision or manage resources.
 
+Terraform is a little different to a typical push config. in that it "talks" to APIs first which then talks to the devices.
+
 ### Which is better: push or pull configuration management?
 ***Pull configuration*** is better for large, distributed, and scalable environments where nodes need to operate independently and pull updates as needed.
 
@@ -440,8 +442,12 @@ variable "GITHUB_TOKEN" {
 ```
 3. go to github -> settings -> developer settings -> personal access tokens
 4. create a new token and select repo as the scope
-5. go to your system properties -> env. var.
-6. add your Github_token to your system and name it like so:
+5. You may also allow the token to destroy your repo within the scope
+
+![alt text](image.png)
+
+1. go to your system properties -> env. var.
+2. add your Github_token to your system and name it like so:
 
 ![alt text](images/tf_var_git_token.png)
 
