@@ -22,6 +22,7 @@
   - [Create a .gitignore files](#create-a-gitignore-files)
     - [IF YOU'VE ALREADY PUSHED SENSITIVE INFORMATION](#if-youve-already-pushed-sensitive-information)
   - [Create a main.tf folder to get a AWS instance running](#create-a-maintf-folder-to-get-a-aws-instance-running)
+- [Environments](#environments)
     - [TO DESTROY:](#to-destroy)
   - [Create an AWS Security Group](#create-an-aws-security-group)
   - [Add your key pair \& security to the instance resource block](#add-your-key-pair--security-to-the-instance-resource-block)
@@ -325,6 +326,11 @@ resource "aws_instance" "app_instance" { # the "app_instance" is how you'll refe
 
 1.   check AWS website and your instance has been created
 ![alt text](images/tfimage-4.png)
+# Environments
+
+Environments can be separated byt using a different variables.tf files for each environment - only one main.tf, multiple variable files, one folder
+
+you can also make a workspace within the main.tf as specify the environment you're referencing for each part
 
 ### TO DESTROY:
 
