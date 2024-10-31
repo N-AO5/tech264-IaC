@@ -29,6 +29,7 @@
   - [Adding variables](#adding-variables)
 - [Use Terraform to create a repo on GitHub](#use-terraform-to-create-a-repo-on-github)
 - [Use Terraform to create a 2-tier deployment on Azure](#use-terraform-to-create-a-2-tier-deployment-on-azure)
+  - [Create a main.tf file](#create-a-maintf-file)
 
 
 # Research Terraform
@@ -449,8 +450,7 @@ variable "GITHUB_TOKEN" {
 3. go to github -> settings -> developer settings -> personal access tokens
 4. create a new token and select repo as the scope
 5. You may also allow the token to destroy your repo within the scope
-
-![alt text](image.png)
+![alt text](images/deletetokenimage.png)
 
 1. go to your system properties -> env. var.
 2. add your Github_token to your system and name it like so:
@@ -465,21 +465,261 @@ variable "GITHUB_TOKEN" {
 
 # Use Terraform to create a 2-tier deployment on Azure
 
+1. Download Azure CLI and put it in my "my_cmd_line_tools" repo
+2. create a Environment variable for az cli in your PATH
+  ![alt text](images/envvarimage.png)
+1. Edit PATH and add the location of the app file
+  ![alt text](images/PATHimage-1.png)
+1. go to your terminal and "az login"
+2. A pop up will allow you to log into your microsoft account
+3. select the resource group (or just press enter as there is only one)
+4. Create a repo for the terraform files we want to create - "tech264-2-tier-app-deployment"
+## Create a main.tf file 
+we need to:
+1. state the provider
+```
+provider "azurerm" { 
+ use_cli = true #tells terraform to use cli for authentication
+ subscription_id = "cd36dfff-6e85-4164-b64e-b4078a773259"
+ resource_provider_registrations = "none"
+ features {}
+}
+```
+1. create a public IP
+```
+resource "azurerm_public_ip" "app_public_ip" {
+ name                = "anjy-app-public-ip"
+ resource_group_name = "tech264" 
+ location            = "UK South"
+ allocation_method   = "Static"     
+}
+```
+1. create a Virtual Network
+```
+ resource "azurerm_virtual_network" "vnet" {
+   name                = "tech264-anjy-VNet"
+   address_space       = ["10.0.0.0/16"]
+   location            = "UK South"
+   resource_group_name = "tech264"
+ }
+```
 
-Create your own VNet with 2 subnets
-Use the same CIDR blocks as you used when we created the 2-subnet VNet manually
+1. create a public subnet
+```
+resource "azurerm_subnet" "app_subnet" {
+ name                 = "app-subnet"
+ resource_group_name  = "tech264"
+ virtual_network_name = azurerm_virtual_network.vnet.name
+ address_prefixes     = ["10.0.1.0/24"]
+}
+```
+1. specify the NSG  rules for the public subnet - allow SSH, HTTP and port 3000 (nginx?)
+```
+resource "azurerm_network_security_group" "app_nsg" {
+   name                = "appNSG"
+   location            = "UK South"
+   resource_group_name = "tech264"
 
-Create the app VM's NSG to allow ports 22, 80 and 3000
-Create the DB VM's NSG to allow:
-SSH
-Mongo DB from public-subnet CIDR block
-Deny everything else
-Create the app-instance and db-instance in the VNet created by Terraform, and to use the NSGs created by Terraform
-Helpful hints:
 
-Use the official documentation for Terraform
-Name things appropriately so that you know what you created with Terraform
-Extra credit:
+ # NSG rules to allow SSH 
+   security_rule {
+     name                       = "allow_ssh"
+     priority                   = 1001
+     direction                  = "Inbound"
+     access                     = "Allow"
+     protocol                   = "Tcp"
+     source_port_range          = "*"
+     destination_port_range     = "22"
+     source_address_prefix      = "*"
+     destination_address_prefix = "*"
+   }
+ # NSG rules to allow HTTP
+   security_rule {
+     name                       = "allow_http"
+     priority                   = 1002
+     direction                  = "Inbound"
+     access                     = "Allow"
+     protocol                   = "Tcp"
+     source_port_range          = "*"
+     destination_port_range     = "80"
+     source_address_prefix      = "*"
+     destination_address_prefix = "*"
+   }
+ # NSG rules to allow port 3000
+   security_rule {
+     name                       = "allow_port_3000"
+     priority                   = 1003
+     direction                  = "Inbound"
+     access                     = "Allow"
+     protocol                   = "Tcp"
+     source_port_range          = "*"
+     destination_port_range     = "3000"
+     source_address_prefix      = "*"
+     destination_address_prefix = "*"
+   }
+ }
+```
+6. create a private subnet
+```
+resource "azurerm_subnet" "db_subnet" {
+ name                 = "db-subnet"
+ resource_group_name  = "tech264"
+ virtual_network_name = azurerm_virtual_network.vnet.name
+ address_prefixes     = ["10.0.2.0/24"]
+}  
+```
+7. specify the NSG rules for the db subnet - allow SHH, allow Mongo DB, deny anything else
+```
+ # Specify the NSG rules for the DB subnet
+ resource "azurerm_network_security_group" "db_nsg" {
+   name                = "db_NSG"
+   location            = "UK South"
+   resource_group_name = "tech264"
 
-Work out how we can get Terraform to add key to our EC2 instance
-Work out how to get user data to run on each of the VMs
+   security_rule {
+     name                       = "allow_ssh"
+     priority                   = 1001
+     direction                  = "Inbound"
+     access                     = "Allow"
+     protocol                   = "Tcp"
+     source_port_range          = "*"
+     destination_port_range     = "22"
+     source_address_prefix      = "*"
+     destination_address_prefix = "*"
+   }
+
+   security_rule {
+     name                       = "allow_mongo"
+     priority                   = 1002
+     direction                  = "Inbound"
+     access                     = "Allow"
+     protocol                   = "Tcp"
+     source_port_range          = "*"
+     destination_port_range     = "27017"
+     source_address_prefix      = "10.0.1.0/24"
+     destination_address_prefix = "*"
+   }
+
+   security_rule {
+     name                       = "deny_all"
+     priority                   = 4096
+     direction                  = "Inbound"
+     access                     = "Deny"
+     protocol                   = "*"
+     source_port_range          = "*"
+     destination_port_range     = "*"
+     source_address_prefix      = "*"
+     destination_address_prefix = "*"
+   }
+ } 
+```
+8. create a network interface for the app vm
+```
+ resource "azurerm_network_interface" "app_nic" {
+   name                = "appNIC"
+   location            = "UK South"
+   resource_group_name = "tech264"
+
+   ip_configuration {
+     name                          = "internal"
+     subnet_id                     = azurerm_subnet.app_subnet.id
+     private_ip_address_allocation = "Dynamic"
+     public_ip_address_id          = azurerm_public_ip.app_public_ip.id
+   }
+ }
+```
+9.  Associate the network security group with the network interface for the app
+```
+ resource "azurerm_network_interface_security_group_association" "app_nic_nsg_assoc" {
+   network_interface_id      = azurerm_network_interface.app_nic.id
+   network_security_group_id = azurerm_network_security_group.app_nsg.id
+ }
+```
+10.  create a network interface for the db vm
+```
+ resource "azurerm_network_interface" "db_nic" {
+     name                = "dbNIC"
+   location            = "UK South"
+   resource_group_name = "tech264"
+
+   ip_configuration {
+     name                          = "internal"
+     subnet_id                     = azurerm_subnet.db_subnet.id
+     private_ip_address_allocation = "Dynamic"
+   }
+ }
+```
+11.  create the app vm - add user data and the ssh key
+```
+   resource "azurerm_linux_virtual_machine" "app_vm" {
+   name                = "tech264-anjy-tf-app-vm"
+     location            = "UK South"
+     resource_group_name = "tech264"
+     size                = "Standard_B1s"
+     admin_username      = "adminuser"
+     network_interface_ids = [azurerm_network_interface.app_nic.id]
+     disable_password_authentication = true
+     os_disk {
+       caching              = "ReadWrite"
+       storage_account_type = "Standard_LRS"
+     }
+     source_image_id = "/subscriptions/cd36dfff-6e85-4164-b64e-b4078a773259/resourceGroups/tech264/providers/Microsoft.Compute/images/tech264-anjy-ready-to-run-app-image"
+
+   # Add my user data
+   user_data = base64encode(file("~/Documents/Sparta Global/github/tech264-cloud-linux/linux/Linux_code_along/BASH_scripts/run-app-only.sh"))
+
+   # Add an ssh key to the app vm
+   admin_ssh_key {
+       username   = "adminuser"
+       public_key = file("~/.ssh/tech264-anjy-az-key.pub")
+     }
+```
+12.  create the db vm - add user data and the ssh key
+```
+ resource "azurerm_linux_virtual_machine" "db_vm" {
+ name                = "tech264-anjy-tf-db-vm"
+ location            = "UK South"
+ resource_group_name = "tech264"
+ size                = "Standard_B1s"
+ admin_username      = "adminuser"
+ network_interface_ids = [azurerm_network_interface.db_nic.id]
+ os_disk {
+   caching              = "ReadWrite"
+   storage_account_type = "Standard_LRS"
+ }
+admin_ssh_key {
+   username   = "adminuser"
+   public_key = file("~/.ssh/tech264-anjy-az-key.pub")
+}
+ source_image_id = "/subscriptions/cd36dfff-6e85-4164-b64e-b4078a773259/resourceGroups/tech264/providers/Microsoft.Compute/images/tech264-anjy-ready-to-run-db-image"
+
+}
+```
+13. Associate the network security group with the network interface for the app  
+ 
+```
+ resource "azurerm_network_interface_security_group_association" "db_nic_nsg_assoc" {
+   network_interface_id      = azurerm_network_interface.db_nic.id
+   network_security_group_id = azurerm_network_security_group.db_nsg.id
+ }
+```
+13. make sure the app creation depends on the db creation
+
+```
+# Make sure the db is made first - app vm depends on db vm
+depends_on = [azurerm_linux_virtual_machine.db_vm]
+}
+```
+
+4. create a .gitignore and add the relevant files
+5. create a variables.tf and make the variables that repeated into variables in that folder
+6. in the bash terminal, cd into the repo created "tech264-2-tier-app-deployment"
+7. do a terraform init
+8. do a terraform plan
+9. do a terraform apply 
+10. check azure for your vms 
+11. go to the app vm IP address / posts
+12. the app should be working!
+
+
+
