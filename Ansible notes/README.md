@@ -84,23 +84,26 @@ It uses an agent-less architecture, meaning you don’t need to install any soft
 ![alt text](images/hostsimage-4.png)
 1.  save and exit
 2.  run the ping again - say yes to connect
+
 ![alt text](images/pingimage-5.png)
-3. to create sub groups within our group
+
+1. to create sub groups within our group
    1. nano back into the hosts file and create a parent group ``[test]``
    2. place ``[web]`` and ``[db]`` as subgroups - ```[test:children] web db```
    ![alt text](images/subgroupsimage-1.png)
-   1. ```ansible-inventory --graph``` to see your grouping and the layout
+   3. ```ansible-inventory --graph``` to see your grouping and the layout
    ![alt text](images/groupingimage-2.png)
 
 ## Running ADHOC
 4. to run ADHOC - to run a command on a machine that is hosted
 5. ```ansible web -a "date"``` to run the date command on the vm under the [web] group
 6. It'll return with the output from your target node vm
+
 ![alt text](images/adhoc.png)
 
 ## Playbook - install nginx + config
 1. in the controller vm
-2. cd into the ansible folder ```/etc/ansible``
+2. cd into the ansible folder ```/etc/ansible```
 3. sudo nano and make a file ```sudo nano install_nginx.yaml```
 4. a yaml file begins with 3 dashes and ends with 3 dots(you can do multiple yaml files within on if you use the "---" and "...")
 ![alt text](images/yamlimage.png)
@@ -121,7 +124,9 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 # Use a copy a module
 1. create a new yaml file in your ansible folder (sudo nano)
 2. name it "copy_test_file.yaml"
+
 ![alt text](images/copymoduleimage.png)
+
 1. run the playbook ```ansible-playbook copy_test_file.yaml```
 2. check your target node home direc
 
@@ -129,7 +134,9 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 # Playbook - provision the APP VM
 
 1. name the playbook "prov_app_with_npm_start.yaml"
+
 * so far...
+
 ![alt text](images/testappvmyamlimage.png)
 
 
