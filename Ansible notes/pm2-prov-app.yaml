@@ -1,0 +1,46 @@
+
+---
+- name: run the app
+  hosts: web
+  gather_facts: yes
+  tasks:
+  - name: install curl
+    ansible.builtin.apt:
+       update_cache: yes
+       name: curl
+       state: present
+
+  - name: add node source repo
+    ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+  - name: install and config node.js
+    become: no
+    ansible.builtin.apt:
+      name: nodejs
+      state: present
+
+  - name: install pm2 globally
+    become: no
+    ansible.builtin.npm:
+     name: pm2
+     global: true
+     state: present
+
+  - name: clone the app folder from github to controller node
+    ansible.builtin.git:
+     repo: "https://github.com/N-AO5/tech264-sparta-app.git"
+     dest: /home/ubuntu/repo
+     version: main
+
+  - name: Install packages based on package.json.
+    become: no
+    community.general.npm:
+      path: /home/ubuntu/repo/app/
+
+  - name: Start the application using pm2
+    become: no
+    command: pm2 start app.js
+    args:
+      chdir: /home/ubuntu/repo/app
+
+

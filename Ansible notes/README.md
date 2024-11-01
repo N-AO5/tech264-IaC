@@ -9,6 +9,22 @@
 - [Use ADHOC to copy to target node](#use-adhoc-to-copy-to-target-node)
 - [Use a copy a module](#use-a-copy-a-module)
 - [Playbook - provision the APP VM](#playbook---provision-the-app-vm)
+  - [To make your code more cloud agnostic](#to-make-your-code-more-cloud-agnostic)
+  - [Using PM2 - for npm see further below](#using-pm2---for-npm-see-further-below)
+    - [Task 1: install curl](#task-1-install-curl)
+    - [Task 2: add the source for nodejs](#task-2-add-the-source-for-nodejs)
+    - [Task 3: install and configure nodejs](#task-3-install-and-configure-nodejs)
+    - [Task 4: download pm2 to run in background (for pm2 run)](#task-4-download-pm2-to-run-in-background-for-pm2-run)
+    - [Task 5: clone the app repo from github](#task-5-clone-the-app-repo-from-github)
+    - [Task 6: install packages](#task-6-install-packages)
+    - [Task 7: pm2 stop all and pm2 start](#task-7-pm2-stop-all-and-pm2-start)
+  - [Complete NPM and PM2 scripts](#complete-npm-and-pm2-scripts)
+- [Playbook - provision the DB VM](#playbook---provision-the-db-vm)
+    - [Task 1: Mongodb public key](#task-1-mongodb-public-key)
+    - [Task 2: Add Mongo DB repo](#task-2-add-mongo-db-repo)
+    - [Task 3: installing Mongo DB](#task-3-installing-mongo-db)
+    - [Task 4: start and enable mongo db](#task-4-start-and-enable-mongo-db)
+    - [Task 5: change the Bind IP in the mongodb config file](#task-5-change-the-bind-ip-in-the-mongodb-config-file)
 
 # Ansible architecture
 ![alt text](images/archimage.png)
@@ -39,10 +55,10 @@ It uses an agent-less architecture, meaning you don’t need to install any soft
 1. create the EC2  instance for our controller vm (make sure it is the correct vm)
 2. name it "tech264-anjy-ubuntu-2204-ansible-controller"
 3. ssh into the vm
-4. do a package update ``sudo apt update``
-5. do a package upgrade``sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y``
+4. do a package update ```sudo apt update```
+5. do a package upgrade```sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y```
 6. install ansible 
-   1. we need out package manager to get the ansible repo ```sudo apt-add-repository ppa:ansible/ansible```
+   1. we need our package manager to get the ansible repo ```sudo apt-add-repository ppa:ansible/ansible```
    2. run the package update again (good practice to get the most updated version) ```sudo apt update -y```
    3. next we install ```sudo apt install ansible -y```
    4. check the version ``ansible --version``
@@ -112,6 +128,8 @@ It uses an agent-less architecture, meaning you don’t need to install any soft
 ![alt text](images/targetrunningimage-1.png)
 
 # Use ADHOC to copy to target node
+An ADHOC cmd is a one off cmds using ansible 
+
 ```
 ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest=~/.ssh/tech264-anjy-aws-key.pem mode=0400"
 ```
@@ -132,12 +150,161 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 
 
 # Playbook - provision the APP VM
+ **make sure to replace your target node public IP in the hosts file on your controller node if you restart your vms**
 
+## To make your code more cloud agnostic 
+1. use the command ```{{ ansible_user }}``` - different vms may have different username
+2. use variables for your paths so it's easy to reference later in your script
+
+## Using PM2 - for npm see further below
 1. name the playbook "prov_app_with_npm_start.yaml"
+2. we need to start up the playbook with a "---"
+3. we reference our target node by referencing the group it's in "[web]"
+4. we write yes to gather facts (though it might make the script run slower)
+5. ```become: true``` means ypu can run your commands as super user
 
-* so far...
+```
+- name: run the app
+  hosts: web
+  gather_facts: yes
+  become: true
+```
 
-![alt text](images/testappvmyamlimage.png)
+### Task 1: install curl 
+1. this will allow us to use the curl command when downloading the correct version of node js 
+2. use the ansible built in apt 
+3. and the state should be present - to keep it running
+```
+tasks:
+  - name: install curl
+    ansible.builtin.apt:
+       update_cache: yes
+       name: curl
+       state: present
+```
+### Task 2: add the source for nodejs
+1. use ansible's shell command
+2. add the curl command (from your prov-app.sh)
+```
+  - name: add node source repo
+    ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+```
+### Task 3: install and configure nodejs
+1. use ansible's apt command
+2. state: present - to keep the package running
+```
+  - name: install and config node.js
+    ansible.builtin.apt:
+      name: nodejs
+      state: present
+```
+### Task 4: download pm2 to run in background (for pm2 run)
+1. use ansible's built in npm to download pm2
+2. we want the it to work globally
+3. state: present - we want it to keep running
+```
+  - name: install pm2 globally
+    ansible.builtin.npm:
+     name: pm2
+     global: true
+     state: present
+```
+### Task 5: clone the app repo from github
+1. we use the ansible git built in to clone the repo
+2. the destination is the home direc and add the name you want the repo to have when you copy it
+3. we want the version to be main
+```
+  - name: clone the app folder from github to controller node
+    ansible.builtin.git:
+     repo: "https://github.com/N-AO5/tech264-sparta-app.git"
+     dest: /home/ubuntu/repo
+     version: main
+```
+### Task 6: install packages
+1. use the community npm cmd
+2. specify the path that you want this command to run
+```
+  - name: Install packages based on package.json.
+    community.general.npm:
+      path: /home/ubuntu/repo/app/
+```
+### Task 7: pm2 stop all and pm2 start
+1. stop everything that could be running
+2. start up the app
+3. specify the location you want this cmd to run
+```
+  - name: Start the application using pm2
+    command: pm2 stop all
+    args:
+      chdir: /home/ubuntu/repo/app
 
+ - name: Start the application using pm2
+   command: pm2 start app.js
+   args:
+      chdir: /home/ubuntu/repo/app
 
+```
+## Complete NPM and PM2 scripts
+[NPM script](npm-prov-app.yaml)
+[PM2 script](pm2-prov-app.yaml)
 
+# Playbook - provision the DB VM
+
+1. name it "prov-db.yaml"
+2. begin with the triple dashes
+3. we want it to gather facts
+4. we want to be super user
+```
+- name: install mongo db
+  hosts: db
+  gather_facts: yes
+  become: true
+```
+
+### Task 1: Mongodb public key
+```
+- name: Import the MongoDB public key
+    ansible.builtin.apt_key:
+      url: https://www.mongodb.org/static/pgp/server-7.0.asc
+      state: present
+```
+
+### Task 2: Add Mongo DB repo
+```
+  - name: Add the MongoDB repository
+    ansible.builtin.apt_repository:
+      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/7.0 multiver>
+      state: present
+      update_cache: yes
+```
+
+### Task 3: installing Mongo DB
+```
+  - name: Install MongoDB 7.0.6
+    ansible.builtin.apt:
+      name: mongodb-org=7.0.6
+      state: present
+      update_cache: yes
+```
+
+### Task 4: start and enable mongo db
+```
+  - name: Ensure MongoDB is enabled and started
+    ansible.builtin.service:
+      name: mongod
+      enabled: yes
+```
+**run this adhoc command to check that mongodb is running ```ansible db -a "sudo systemctl status mongod"```**
+
+### Task 5: change the Bind IP in the mongodb config file
+
+**run this adhoc command to check your bind ip ```ansible db -a "cat /etc/mongod.conf"```**
+
+```
+ - name: update bind IP using lineinfile module
+    ansible.builtin.lineinfile:
+      path: "/etc/mongod.conf"
+      search_string: '127.0.0.1'
+      line: "  bindIp: 0.0.0.0"
+      state: present
+```
