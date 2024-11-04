@@ -1,0 +1,8 @@
+---
+- name: DB provisions playbook
+  import_playbook: prov_db.yaml
+
+- name: App provisions playbook
+  import_playbook: prov_app_with_npm_start.yaml
+
+
