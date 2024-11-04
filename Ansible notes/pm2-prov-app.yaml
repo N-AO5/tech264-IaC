@@ -3,6 +3,11 @@
   hosts: web
   gather_facts: yes
   become: true
+
+  #environment:
+    #DB_HOST:mongodb://172.31.18.149:27017/posts
+  # use this variable instead of setting the env var 
+
   tasks:
   - name: install curl
     ansible.builtin.apt:
@@ -40,7 +45,7 @@
   - name: resets env var in db host
     ansible.builtin.shell: "bash -c 'source /etc/environment'"
 
-
+# npm install
   - name: Install packages based on package.json.
     community.general.npm:
       path: /home/ubuntu/repo/app/

@@ -174,6 +174,11 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
   gather_facts: yes
   become: true
 ```
+using the vars to collect specific variables, this means the variable for the host ip is dynamic- no need to manually update the private IP for the db vm
+```
+#vars:
+    #db_host_ip: "{{ hostvars[groups['db'][0]]['ansible_default_ipv4']['address'] }}"
+```
 
 ### Task 1: install curl 
 1. this will allow us to use the curl command when downloading the correct version of node js 
@@ -242,6 +247,11 @@ tasks:
 
  - name: resets env var in db host
     ansible.builtin.shell: "bash -c 'source /etc/environment'"
+```
+- the env var can be set in the yaml file and get the script to refer to the variable
+```
+environment:
+  DB_HOST:mongodb://172.31.18.149:27017/posts
 ```
 ### Task 7: install packages
 1. use the community npm cmd
