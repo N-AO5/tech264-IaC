@@ -1,8 +1,8 @@
-
 ---
 - name: run the app
   hosts: web
   gather_facts: yes
+  become: true
   tasks:
   - name: install curl
     ansible.builtin.apt:
@@ -14,13 +14,11 @@
     ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 
   - name: install and config node.js
-    become: no
     ansible.builtin.apt:
       name: nodejs
       state: present
 
   - name: install pm2 globally
-    become: no
     ansible.builtin.npm:
      name: pm2
      global: true
@@ -32,15 +30,39 @@
      dest: /home/ubuntu/repo
      version: main
 
+  - name: add DB_HOST to environment file as env. var.
+    ansible.builtin.lineinfile:
+      path: "/etc/environment"
+      regexp: 'export ^DB_HOST='
+      line: 'export DB_HOST="mongodb://172.31.18.149:27017/posts"'
+      state: present
+
+  - name: resets env var in db host
+    ansible.builtin.shell: "bash -c 'source /etc/environment'"
+
+
   - name: Install packages based on package.json.
-    become: no
     community.general.npm:
       path: /home/ubuntu/repo/app/
 
   - name: Start the application using pm2
-    become: no
-    command: pm2 start app.js
+    command: pm2 stop all || true
     args:
-      chdir: /home/ubuntu/repo/app
+      chdir: /home/ubuntu/repo/app/
+  
+  # if no processes are running - then ignore the error that will come 
 
 
+  - name: Start the application using pm2
+    command: pm2 start app.js --update-env
+    environment:
+      DB_HOST: "mongodb://172.31.18.149:27017"
+    args:
+      chdir: /home/ubuntu/repo/app/
+
+# #Seed the database - doesn't seem to work..
+ # - name: Seed the MongoDB database
+   # ansible.builtin.command:
+    #  cmd: node seeds/seed.js
+    #args:
+     # chdir: /home/ubuntu/repo/app/

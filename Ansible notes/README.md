@@ -16,8 +16,10 @@
     - [Task 3: install and configure nodejs](#task-3-install-and-configure-nodejs)
     - [Task 4: download pm2 to run in background (for pm2 run)](#task-4-download-pm2-to-run-in-background-for-pm2-run)
     - [Task 5: clone the app repo from github](#task-5-clone-the-app-repo-from-github)
-    - [Task 6: install packages](#task-6-install-packages)
-    - [Task 7: pm2 stop all and pm2 start](#task-7-pm2-stop-all-and-pm2-start)
+    - [Task 6: add the DB\_HOST env var](#task-6-add-the-db_host-env-var)
+    - [Task 7: install packages](#task-7-install-packages)
+    - [Task 8: pm2 stop all and pm2 start](#task-8-pm2-stop-all-and-pm2-start)
+    - [Task 9: seed the database (should work IN THEORY)](#task-9-seed-the-database-should-work-in-theory)
   - [Complete NPM and PM2 scripts](#complete-npm-and-pm2-scripts)
 - [Playbook - provision the DB VM](#playbook---provision-the-db-vm)
     - [Task 1: Mongodb public key](#task-1-mongodb-public-key)
@@ -226,7 +228,22 @@ tasks:
      dest: /home/ubuntu/repo
      version: main
 ```
-### Task 6: install packages
+### Task 6: add the DB_HOST env var
+1. the env var is set in the environment repo 
+2. use the the line in file module to add the db_host variable to the end of the file
+3. we want the state to stay present
+```
+  - name: add DB_HOST to environment file as env. var.
+    ansible.builtin.lineinfile:
+      path: "/etc/environment"
+      regexp: 'export ^DB_HOST='
+      line: 'export DB_HOST="mongodb://172.31.18.149:27017/posts"'
+      state: present
+
+ - name: resets env var in db host
+    ansible.builtin.shell: "bash -c 'source /etc/environment'"
+```
+### Task 7: install packages
 1. use the community npm cmd
 2. specify the path that you want this command to run
 ```
@@ -234,23 +251,34 @@ tasks:
     community.general.npm:
       path: /home/ubuntu/repo/app/
 ```
-### Task 7: pm2 stop all and pm2 start
+### Task 8: pm2 stop all and pm2 start
 1. stop everything that could be running
 2. start up the app
 3. specify the location you want this cmd to run
 4. shouldn't need sudo 
 ```
   - name: Start the application using pm2
-    command: pm2 stop all
+    command: pm2 stop all || true
     args:
-      chdir: /home/ubuntu/repo/app
+      chdir: /home/ubuntu/repo/app/
 
  - name: Start the application using pm2
    command: pm2 start app.js
    args:
-      chdir: /home/ubuntu/repo/app
+      chdir: /home/ubuntu/repo/app/
+```
+
+### Task 9: seed the database (should work IN THEORY)
 
 ```
+# #Seed the database - doesn't seem to work..
+ # - name: Seed the MongoDB database
+   # ansible.builtin.command:
+    #  cmd: node seeds/seed.js
+    #args:
+     # chdir: /home/ubuntu/repo/app/
+```
+
 ## Complete NPM and PM2 scripts
 [NPM script](npm-prov-app.yaml)
 [PM2 script](pm2-prov-app.yaml)
@@ -325,6 +353,7 @@ we need to add the repo for mongodb
       state: present
 ```
 ### Task 6: start and enable mongodb again
+A handler can be used if you want to restart mongodb multiple times
 ```
   - name: Ensure MongoDB is enabled and started
     ansible.builtin.service:

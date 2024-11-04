@@ -1,59 +1,46 @@
+
+
+# install mongdb for db vm
+
 ---
-- name: run the app
-  hosts: web
+- name: install mongo db
+  hosts: db
   gather_facts: yes
   become: true
+
   tasks:
-  - name: install curl
-    ansible.builtin.apt:
-       update_cache: yes
-       name: curl
-       state: present
-
-  - name: add node source repo
-    ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-
-  - name: install and config node.js
-    ansible.builtin.apt:
-      name: nodejs
+  - name: Import the MongoDB public key
+    ansible.builtin.apt_key:
+      url: https://www.mongodb.org/static/pgp/server-7.0.asc
       state: present
 
-  - name: install pm2 globally
-    ansible.builtin.npm:
-     name: pm2
-     global: true
-     state: present
+  - name: Add the MongoDB repository
+    ansible.builtin.apt_repository:
+      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/7.0 multiver>
+      state: present
+      update_cache: yes
 
-  - name: clone the app folder from github to controller node
-    ansible.builtin.git:
-     repo: "https://github.com/N-AO5/tech264-sparta-app.git"
-     dest: /home/ubuntu/repo
-     version: main
+  - name: Install MongoDB 7.0.6
+    ansible.builtin.apt:
+      name: mongodb-org=7.0.6
+      state: present
+      update_cache: yes
 
-  - name: add DB_HOST to bashrc as env. var.
+  - name: Ensure MongoDB is enabled and started
+    ansible.builtin.service:
+      name: mongod
+      enabled: yes
+      state: started
+
+  - name: update bind IP using lineinfile module
     ansible.builtin.lineinfile:
-      path: "/etc/environment"
-      regexp: 'export ^DB_HOST='
-      line: 'export DB_HOST="mongodb://172.31.18.149:27017/posts"'
+      path: "/etc/mongod.conf"
+      search_string: '127.0.0.1'
+      line: "  bindIp: 0.0.0.0"
       state: present
 
-  - name: resets env var in db host
-    ansible.builtin.shell: "bash -c 'source /etc/environment'"
-
-# #Seed the database - doesn't seem to work..
- # - name: Seed the MongoDB database
-   # ansible.builtin.command:
-    #  cmd: node seeds/seed.js
-    #args:
-     # chdir: /home/ubuntu/repo/app/
-
-  - name: Install packages based on package.json.
-    community.general.npm:
-      path: /home/ubuntu/repo/app/
-
-  - name: Start the application using pm2
-    command: pm2 start app.js --update-env
-    environment:
-      DB_HOST: "mongodb://172.31.18.149:27017"
-    args:
-      chdir: /home/ubuntu/repo/app/
+  - name: Ensure MongoDB is enabled and started
+    ansible.builtin.service:
+      name: mongod
+      enabled: yes
+      state: started
