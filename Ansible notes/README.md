@@ -7,7 +7,7 @@
   - [Running ADHOC](#running-adhoc)
   - [Playbook - install nginx + config](#playbook---install-nginx--config)
 - [Use ADHOC to copy to target node](#use-adhoc-to-copy-to-target-node)
-- [Use a copy a module](#use-a-copy-a-module)
+- [Use a copy module](#use-a-copy-module)
 - [Playbook - provision the APP VM](#playbook---provision-the-app-vm)
   - [To make your code more cloud agnostic](#to-make-your-code-more-cloud-agnostic)
   - [Using PM2 - for npm see further below](#using-pm2---for-npm-see-further-below)
@@ -25,6 +25,9 @@
     - [Task 3: installing Mongo DB](#task-3-installing-mongo-db)
     - [Task 4: start and enable mongo db](#task-4-start-and-enable-mongo-db)
     - [Task 5: change the Bind IP in the mongodb config file](#task-5-change-the-bind-ip-in-the-mongodb-config-file)
+    - [Task 6: start and enable mongodb again](#task-6-start-and-enable-mongodb-again)
+  - [Trouble shooting](#trouble-shooting)
+- [Create a master playbook](#create-a-master-playbook)
 
 # Ansible architecture
 ![alt text](images/archimage.png)
@@ -139,7 +142,7 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 - specify path you want it to go and the name ```dest=~/.ssh/tech264-anjy-aws-key.pem```
 - choose the permissions the file will have ```mode=0400```
 
-# Use a copy a module
+# Use a copy module
 1. create a new yaml file in your ansible folder (sudo nano)
 2. name it "copy_test_file.yaml"
 
@@ -192,6 +195,7 @@ tasks:
 ### Task 3: install and configure nodejs
 1. use ansible's apt command
 2. state: present - to keep the package running
+3. if in home direc. no need for sudo
 ```
   - name: install and config node.js
     ansible.builtin.apt:
@@ -202,6 +206,7 @@ tasks:
 1. use ansible's built in npm to download pm2
 2. we want the it to work globally
 3. state: present - we want it to keep running
+4. requires sudo privileges
 ```
   - name: install pm2 globally
     ansible.builtin.npm:
@@ -213,6 +218,7 @@ tasks:
 1. we use the ansible git built in to clone the repo
 2. the destination is the home direc and add the name you want the repo to have when you copy it
 3. we want the version to be main
+4. if cloning to home direc. - no need for sudo privileges 
 ```
   - name: clone the app folder from github to controller node
     ansible.builtin.git:
@@ -232,6 +238,7 @@ tasks:
 1. stop everything that could be running
 2. start up the app
 3. specify the location you want this cmd to run
+4. shouldn't need sudo 
 ```
   - name: Start the application using pm2
     command: pm2 stop all
@@ -262,6 +269,10 @@ tasks:
 ```
 
 ### Task 1: Mongodb public key
+1. we need the key to access mongo db
+2. use the built in app key module
+3. url - the url that the key is 
+4. state present - we need it constantly
 ```
 - name: Import the MongoDB public key
     ansible.builtin.apt_key:
@@ -270,6 +281,7 @@ tasks:
 ```
 
 ### Task 2: Add Mongo DB repo
+we need to add the repo for mongodb
 ```
   - name: Add the MongoDB repository
     ansible.builtin.apt_repository:
@@ -279,7 +291,11 @@ tasks:
 ```
 
 ### Task 3: installing Mongo DB
-```
+- This module downloads the mongodb but doesn't get it running unlike with nginx.
+- whether the package runs or not straight after installation depends the package default.
+- state: present - checks that the package is installed and present (for mongodb specifically).
+
+ ```
   - name: Install MongoDB 7.0.6
     ansible.builtin.apt:
       name: mongodb-org=7.0.6
@@ -288,17 +304,17 @@ tasks:
 ```
 
 ### Task 4: start and enable mongo db
+- Needs to be started in the playbook after installing - unlike other packages ie nginx
+
 ```
   - name: Ensure MongoDB is enabled and started
     ansible.builtin.service:
       name: mongod
       enabled: yes
 ```
-**run this adhoc command to check that mongodb is running ```ansible db -a "sudo systemctl status mongod"```**
+
 
 ### Task 5: change the Bind IP in the mongodb config file
-
-**run this adhoc command to check your bind ip ```ansible db -a "cat /etc/mongod.conf"```**
 
 ```
  - name: update bind IP using lineinfile module
@@ -308,3 +324,33 @@ tasks:
       line: "  bindIp: 0.0.0.0"
       state: present
 ```
+### Task 6: start and enable mongodb again
+```
+  - name: Ensure MongoDB is enabled and started
+    ansible.builtin.service:
+      name: mongod
+      enabled: yes
+      state: started
+```
+## Trouble shooting
+1. check that mongodb is running - **run this adhoc command to check that mongodb is running ```ansible db -a "sudo systemctl status mongod"```**
+2. check that the bindip had been configured - 
+**run this adhoc command to check your bind ip ```ansible db -a "cat /etc/mongod.conf"```** or **```ansible db  -a "grep 'bindIp' /etc/mongod.conf```**
+3. check if multiple processes are running in the background ```ps aux```, use kill to stop them
+
+# Create a master playbook
+This will run both playbooks for you, make sure to put them in order that you want them to run (ie. db first)
+1. create the yaml file - ```sudo nano master_playbook```
+2. name the db first - so it runs that playbook first 
+3. use the command ```import_playbook``
+4. do the app vm next
+
+```
+---
+name: DB provisions playbook
+import_playbook: prov_db.yaml
+
+name: App provisions playbook
+import_playbook: prov_app_with_npm_start.yaml
+```
+![alt text](images/masterplaybookimage.png)
