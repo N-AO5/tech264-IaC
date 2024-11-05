@@ -8,6 +8,10 @@
 - [What is provisioning of infrastructure? Do CM tools do it?](#what-is-provisioning-of-infrastructure-do-cm-tools-do-it)
 - [What is Ansible and how does it work?](#what-is-ansible-and-how-does-it-work)
 - [Who is using IaC and Ansible in the industry](#who-is-using-iac-and-ansible-in-the-industry)
+- [Terraform and Ansible: big picture](#terraform-and-ansible-big-picture)
+- [Green vs Brown field](#green-vs-brown-field)
+  - [**Green field** means that there is NO existing architecture](#green-field-means-that-there-is-no-existing-architecture)
+  - [**Brown field** means the IS  existing architecture.](#brown-field-means-the-is--existing-architecture)
 
 
 # What is IaC?
@@ -150,4 +154,21 @@ Etsy: Manages its AWS cloud infrastructure using Ansible and other IaC tools to 
 5. Media and Entertainment:
 
 Sony: Automates its cloud infrastructure using Ansible, ensuring that its services and applications are deployed efficiently across various data centers.
+
+# Terraform and Ansible: big picture
+
+![alt text](bigpictureimage.png)
+
+# Green vs Brown field
+## **Green field** means that there is NO existing architecture 
+
+- things can be built from the ground up 
+- IaC tools can be used from the get go 
+- 
+## **Brown field** means the IS  existing architecture.
+
+- If there are legacy systems (older and not up to date eg. older OS systems and libraries) may have difficultly being provisioned by IaC
+- they haven't been set up using IaC so it may be difficulty implementing it
+- difficult to determine the setting, config drift, firewall rules etc for each environment - time consuming 
+- you must figure out what the environment settings SHOULD look like and then convert 
 

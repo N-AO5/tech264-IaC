@@ -142,7 +142,8 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 - use the ansible copy modules ```ansible.builtin.copy```
 - specify what you want to copy and its path ```src=~/.ssh/tech264-anjy-aws-key.pem```
 - specify path you want it to go and the name ```dest=~/.ssh/tech264-anjy-aws-key.pem```
-- choose the permissions the file will have ```mode=0400```
+- choose the permissions the file will have ```mode=0400``` where the second=user, third=group, fourth=other and 2=read, 3=write and 4=execute 
+
 
 # Use a copy module
 1. create a new yaml file in your ansible folder (sudo nano)
@@ -150,8 +151,10 @@ ansible web -m ansible.builtin.copy -a "src=~/.ssh/tech264-anjy-aws-key.pem dest
 
 ![alt text](images/copymoduleimage.png)
 
-1. run the playbook ```ansible-playbook copy_test_file.yaml```
-2. check your target node home direc
+1. you can add a mode on the end as well to define the permissions 
+2. you can also set ownership of the files 
+3. run the playbook ```ansible-playbook copy_test_file.yaml```
+4. check your target node home direc
 
 
 # Playbook - provision the APP VM
